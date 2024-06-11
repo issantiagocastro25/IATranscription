@@ -23,91 +23,143 @@
 
 <body>
 
-    <div id="app" class="container mt-5">
-        <div class="row justify-content-center">
+    <div id="app" class="container mt-3">
+
+        <!-- Section Select Agents -->
+        <div class="container bg-body-tertiary bg-r rounded-3">
+            <h2 class="pb-2 border-bottom">Agentes</h2>
+
+            <div class="row justify-content-center align-items-center">
+                <div class="col-6">
+                    <div v-for="agente in agents" :key="agente._id" class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" :value="agente" v-model="agentesSeleccionados"
+                            id="flexCheckDefault">
+                        <label class="form-check-label" :for="agente">{{ agente.rol }}</label>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <button class="btn btn-success" @click=" editMode = !editMode">{{ editMode ? 'Cerrar' : 'Editar'}}</button>
+                </div>
+            </div>
+        </div>
+        <!-- End Section Select Agents -->
+
+        <!-- Section Edit Agents -->
+        <div class="row justify-content-center mt-3" v-if="editMode">
+            <div class="col-lg-8">
+                <div v-for="agent in agentesSeleccionados" :key="agent._id" class="row input-group mt-3 fs-8 fw-lighter">
+                    <span class=" col-2 input-group-text">Prompt</span>
+                    <textarea class=" col-6 form-control" rows="10" v-model="agent.prompt" aria-label="Prompt" style="font-size: 14px;"></textarea>
+                    <button class="col-2 btn btn-warning rounded-end" type="button" @click="uploadSystemPrompt(agent)">Actualizar</button>
+                    <div>{{ agent.description }}</div>
+                </div>
+            </div>
+        </div>
+        <!-- Section Edit Agents -->
+
+        <!-- Upload Video -->
+        <div class="row justify-content-center mt-4">
             <div class="col-lg-8 mb-3">
                 <div class="input-group input-group-lg mb-3">
                     <input type="file" class="form-control fs-4 rounded-start" aria-describedby="inputGroupFileAddon04"
                         aria-label="Subir archivo" @change="handleFileUpload">
-                    <button class="btn btn-primary rounded-end fs-4" type="button" @click="uploadVideo">Subir</button>
+                    <button class="btn btn-primary rounded-end fs-4" type="button" @click="uploadVideo">Generar Inferencia</button>
                 </div>
                 <p class="text-blue mt-3 text-center">{{ statusUpload }}</p>
             </div>
         </div>
-
-        <div class="row justify-content-center">
-            <div class="col-5">
-                <div v-for="agente in agents" :key="agente._id" class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" :value="agente" v-model="agentesSeleccionados"
-                        id="flexCheckDefault">
-                    <label class="form-check-label" :for="agente">{{ agente.rol }}</label>
-                </div>
-                <button class="btn btn-secondary mt-3 mb-3" @click="toggleEdit">{{ editMode ? 'Guardar' : 'Editar'
-                    }}</button>
-            </div>
-        </div>
-
-        <div class="row justify-content-center mt-3" v-if="editMode">
-            <div class="col-lg-8 p-4">
-                <div v-for="p in agentesSeleccionados" :key="p._id" class="input-group mb-4 fs-8 fw-lighter">
-                    <span class="input-group-text">Sistema de Prompts</span>
-                    <textarea class="form-control" v-model="p.prompt" aria-label="Prompt"
-                        style="font-size: 14px;"></textarea>
-                    <button class="btn btn-warning rounded-end" type="button"
-                        @click="uploadSystemPrompt(p)">Actualizar</button>
-                    <div class="mt-2 ms-4 ">{{ p.description }}</div>
-                </div>
-            </div>
-        </div>
+        <!-- End upload Video -->
+        
 
         <div class="row justify-content-center mt-3">
-            <div v-if="loaderTranscription" class="col-5 text-center">
-                <div class="spinner-border text-info" role="status">
-                    <span class="visually-hidden">Cargando</span>
-                </div>
-                <div><span>Generando transcripción...</span></div>
-            </div>
-            <div v-else class="col-5 card">
+            <div class="col-5">
                 <div class="card-body">
                     <h3 class="card-title text-center">Transcripción:</h3>
                     <p class="card-text mt-3">{{transcription}}</p>
                 </div>
             </div>
 
-            <div v-if="loaderInference" class="col-5 text-center">
-                <div class="spinner-border text-info" role="status">
-                    <span class="visually-hidden">Cargando</span>
-                </div>
-                <div><span>Generando inferencia...</span></div>
-            </div>
-            <div v-else class="col-5">
-                <div class="card" v-for="(response, index) in inferencias" :key="index">
+            <div class="col-5">
+                <h3 class="card-title text-center">Inferencia:</h3>
+                <div class="card" v-for="(inference, index) in inferencias" :key="index">
                     <div class="card-body">
-                        <h5 class="card-title">Inferencia: {{ agentesSeleccionados[index].rol }}</h5>
-                        <p class="card-text">{{ response }}</p>
+                        <h5 class="card-title">Agente: {{ inference.agent }}</h5>
+                        <p class="card-text">{{ inference.inference }}</p>
                     </div>
                 </div>
             </div>
-
         </div>
-    </div>
-
-    <!-- Modales de estado -->
-  <!-- Modales de estado -->
-        <!-- Modales de estado -->
-        <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        
+        <!-- Modal de alerta -->
+        <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="statusModalLabel">{{ modalTitle }}</h5>
+                        <h5 class="modal-title" id="alertModalLabel">Advertencia</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <p>{{ modalMessage }}</p>
+                    <div class="modal-body mx-auto ">
+                        <div>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 text-danger" style="width: 10rem; height: 10rem;" fill="red" viewBox="0 0 16 16"
+                            role="img" aria-label="Warning:">
+                            <path
+                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                            
+                        </svg>
+                        </div> 
+                        
+                    </div>
+
+                    <h1 class="mx-auto ">Seleccione un archivo de video para subir.</h1>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
         </div>
+
+         <!-- Modal de progreso -->
+         <div class="modal fade" id="modalProgress" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="alertModalLabel">Tareas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <ul>
+                                <li v-for="(task, index) in tasks" :key="index">
+                                    <div v-if="task.status === 'waiting'"> 
+                                        <div class="spinner-border text-primary spinner-border-sm" style="width: 1rem; height: 1rem;" role="status">
+                                            <span class="sr-only"></span>
+                                        </div>
+                                       <!--{{ task.status }} - --> {{ task.name }} </div>
+                                    <div v-else-if="task.status === 'success'"> 
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                                            <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"/>
+                                        </svg>
+                                        <!--{{ task.status }} - --> {{ task.name }} </div>
+                                    <div v-else-if="task.status === 'failed'"> 
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+                                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                                        </svg>
+                                        <!--{{ task.status }} - --> {{ task.name }} </div>
+                                    
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+
 
     <script>
         const { createApp, ref, onMounted, watch } = Vue
@@ -116,7 +168,7 @@
             setup() {
                 const inferenciaNames = ref(['Evaluador', 'Resumen', 'Otra inferencia']);
 
-                const apiHost = 'http://186.28.221.82:1905';
+                const apiHost = 'http://192.168.0.102:1905';
                 const selectedVideoFile = ref(null);
                 const loader = ref(false);
                 const loaderTranscription = ref(false);
@@ -130,8 +182,23 @@
                 const agentesSeleccionados = ref([]);
                 const inferencias = ref([]);
                 const editMode = ref(false);
-                const modalTitle = ref('');
-                const modalMessage = ref('');
+                const viewProgress = ref('');
+                const taskStatus = Object.freeze({
+                    WAITING: 'waiting',
+                    SUCCESS: 'success',
+                    FAILED: 'failed'
+                });
+
+                const tasks = ref([
+                    { 
+                        name: 'Subiendo video',
+                        status: false, // waiting, success, failed 
+                    },
+                    {
+                        name: 'Generando Transcripcion',
+                        status: false, // waiting, success, failed 
+                    },
+                ]);
 
                 const handleFileUpload = (event) => {
                     selectedVideoFile.value = event.target.files[0];
@@ -143,153 +210,171 @@
                     }
                 };
 
-                const toggleEdit = () => {
-                    editMode.value = !editMode.value;
-                };
-
-                const showModal = (title, message) => {
-                    modalTitle.value = title;
-                    modalMessage.value = message;
-                    const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+                const showModalProgress = () => {
+                    const modal = new bootstrap.Modal(document.getElementById('modalProgress'));
                     modal.show();
-                    setTimeout(() => {
-                        modal.hide();
-                    }, 2000);
+                    // setTimeout(() => {
+                    //     modal.hide();
+                    // }, 2000);
                 };
 
-        const uploadVideo = async () => {
-            if (!selectedVideoFile.value) {
-                new bootstrap.Modal(document.getElementById('alertModal')).show();
-                return;
-            }
-            loaderTranscription.value = true;
-            loaderInference.value = true;
-            showModal('Cargando', 'Generando transcripción...');
-
-            const formData = new FormData();
-            formData.append('video', selectedVideoFile.value);
-
-            try {
-                const response = await axios.post(`${apiHost}/transcription/video`, formData);
-                if (response.status !== 200) {
-                    statusUpload.value = 'Error al subir el archivo';
-                    showModal('Error', 'Error generando la transcripción');
-                } else {
-                    statusUpload.value = 'Archivo subido correctamente';
-                    transcription.value = response.data.text;
-                    inferencias.value = await getInferences();
-                    showModal('Éxito', 'Transcripción completada');
-                }
-            } catch (error) {
-                statusUpload.value = error.message;
-                showModal('Error', 'Error generando la transcripción');
-            } finally {
-                loaderTranscription.value = false;
-                loaderInference.value = false;
-            }
-        };
-
-        const uploadSystemPrompt = async (agent) => {
-            try {
-                const response = await axios.put(`${apiHost}/agents/${agent._id}`, {
-                    prompt: agent.prompt,
-                });
-                if (response.status !== 200) {
-                    statusUpload.value = 'Error actualizando el prompt system';
-                    showModal('Error', `Error actualizando el prompt para ${agent.rol}`);
-                } else {
-                    statusUpload.value = 'Prompt actualizado correctamente';
-                    const updatedAgent = response.data;
-                    const index = agents.value.findIndex(a => a._id === agent._id);
-                    if (index !== -1) {
-                        agents.value[index] = updatedAgent;
+                const uploadVideo = async () => {
+                    if (!selectedVideoFile.value) {
+                        new bootstrap.Modal(document.getElementById('alertModal')).show();
+                        return;
                     }
-                    showModal('Éxito', `Prompt actualizado para ${agent.rol}`);
-                }
-            } catch (error) {
-                statusUpload.value = error.message;
-                showModal('Error', `Error actualizando el prompt para ${agent.rol}`);
+                    const formData = new FormData();
+                    formData.append('video', selectedVideoFile.value);
+
+                    // Crear la lista de tareas
+                    const agentTasks = agentesSeleccionados.value.map( (agent) => ({
+                        name: `Agente ${agent.rol}`,
+                        rol: agent.rol,
+                        status: false
+                    }))
+                    // agregar a la lista de tareas
+                    tasks.value.push(...agentTasks)
+                    
+                    // Iniciar el estado de las tasks
+                    tasks.value.forEach(task => {
+                        task.status = taskStatus.WAITING
+                    });
+                    // mostrar el modal con las tareas
+                    showModalProgress()
+
+                    try {
+                        const response = await axios.post(`${apiHost}/transcription/video`, formData);
+                        if (response.status !== 200) {
+                            tasks.value[0].status = taskStatus.FAILED; // Upload video
+                            tasks.value[1].status = taskStatus.FAILED; // transcription
+                        } else {
+                            tasks.value[0].status = taskStatus.SUCCESS; // Upload video
+                            tasks.value[1].status = taskStatus.SUCCESS; // transcription
+
+                            transcription.value = response.data.text;
+                            
+                            // Obtener las inferencias
+                            inferencias.value = await getInferences();
+                            // viewProgress.value = 'inferenceSuccess';
+                        }
+                    } catch (error) {
+                        statusUpload.value = error.message;
+                        tasks.value[0].status = taskStatus.FAILED;
+                        tasks.value[1].status = taskStatus.FAILED;
+                    }
+                };
+
+                const uploadSystemPrompt = async (agent) => {
+                    
+                    try {
+                        console.log('Actualizando prompt para el agente:', agent);
+                        const response = await axios.put(`${apiHost}/agents/${agent._id}`, {
+                            prompt: agent.prompt,
+                        });
+                        if (response.status !== 200) {
+                            statusUpload.value = 'Error actualizando el prompt system';
+                        } else {
+                            statusUpload.value = 'Prompt actualizado correctamente';
+                            console.log('Respuesta del servidor:', response.data);
+                            const updatedAgent = response.data;
+                            // Actualizar el agente en el estado local
+                            const index = agents.value.findIndex(a => a._id === agent._id);
+                            if (index !== -1) {
+                                agents.value[index] = updatedAgent;
+                            }
+                        }
+                    } catch (error) {
+                        statusUpload.value = error.message;
+                    }
+                };
+
+                const getInferenceForAgent = async (id, prompt) => {
+                    try {
+                        const payload = { text: prompt };
+                        const response = await axios.post(`${apiHost}/agents/${id}/inference`, payload);
+                        if (response.status !== 200) {
+                            statusUpload.value = 'Error obteniendo la inferencia';
+                        }
+                        // se obtiene la respuesta de cada agente
+                        console.log(response);
+                        const myresponse = {
+                            agent: response.data.agent.rol,
+                            inference: response.data.inference.content
+                        }
+                        // Cambiar el estado del agente
+                        const agentIndex = tasks.value.findIndex(task => task.rol === myresponse.agent);
+                        tasks.value[agentIndex].status = taskStatus.SUCCESS; // transcription
+
+                        return myresponse;
+                    } catch (error) {
+                        statusUpload.value = error.message;
+                    }
+                };
+
+                const getInferences = async () => {
+                    const inferences = await Promise.all(
+                        agentesSeleccionados.value.map(async (agent) => {
+                            return await getInferenceForAgent(agent._id, transcription.value);
+                        })
+                    );
+                    console.log(inferences);
+                    return inferences;
+                };
+
+                const getAgents = async () => {
+                    try {
+                        const response = await axios.get(`${apiHost}/agents`);
+                        if (response.status !== 200) {
+                            console.log('Error obteniendo los agentes');
+                        } else {
+                            agents.value = response.data;
+                            console.log('Agentes obtenidos del servidor:', agents.value);
+                        }
+                    } catch (error) {
+                        statusUpload.value = error.message;
+                    }
+                };
+
+                onMounted(async () => {
+                    await getAgents();
+                    console.log('Agentes cargados:', agents.value);
+                });
+
+                watch(agentesSeleccionados, async () => {
+                    await getAgents();
+                });
+
+                return {
+                    handleFileUpload,
+                    uploadVideo,
+                    loaderTranscription,
+                    loaderInference,
+                    alert,
+                    statusUpload,
+                    transcription,
+                    inferencia,
+                    promptSystem,
+                    agents,
+                    uploadSystemPrompt,
+                    agentesSeleccionados,
+                    inferencias,
+                    editMode,
+                    inferenciaNames,loader, viewProgress, tasks
+                };
             }
-        };
-
-        const getInferenceForAgent = async (id, prompt) => {
-            try {
-                const payload = { text: prompt };
-                const response = await axios.post(`${apiHost}/agents/${id}/inference`, payload);
-                if (response.status !== 200) {
-                    statusUpload.value = 'Error obteniendo la inferencia';
-                    showModal('Error', `Error generando la inferencia para el agente ${id}`);
-                }
-                return response.data.inference.content;
-            } catch (error) {
-                statusUpload.value = error.message;
-                showModal('Error', `Error generando la inferencia para el agente ${id}`);
-            }
-        };
-
-        const getInferences = async () => {
-            const inferences = await Promise.all(
-                agentesSeleccionados.value.map(async (agent) => {
-                    showModal('Cargando', `Generando inferencia para ${agent.rol}`);
-                    const inference = await getInferenceForAgent(agent._id, transcription.value);
-                    showModal('Éxito', `Inferencia completada para ${agent.rol}`);
-                    return inference;
-                })
-            );
-            return inferences;
-        };
-
-        const getAgents = async () => {
-            try {
-                const response = await axios.get(`${apiHost}/agents`);
-                if (response.status !== 200) {
-                    console.log('Error obteniendo los agentes');
-                } else {
-                    agents.value = response.data;
-                    console.log('Agentes obtenidos del servidor:', agents.value);
-                }
-            } catch (error) {
-                statusUpload.value = error.message;
-            }
-        };
-
-        onMounted(async () => {
-            await getAgents();
-            console.log('Agentes cargados:', agents.value);
-        });
-
-        watch(agentesSeleccionados, async () => {
-            await getAgents();
-        });
-
-        return {
-            handleFileUpload,
-            uploadVideo,
-            loaderTranscription,
-            loaderInference,
-            alert,
-            statusUpload,
-            transcription,
-            inferencia,
-            promptSystem,
-            agents,
-            uploadSystemPrompt,
-            agentesSeleccionados,
-            inferencias,
-            editMode,
-            toggleEdit,
-            inferenciaNames,
-            modalTitle,
-            modalMessage
-        };
-        }
         }).mount('#app')
-            </script>
+    </script>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-                crossorigin="anonymous"></script>
+    <style>
+        .mi-icono {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 
-        </body>
+</body>
 
-        </html>
+</html>
