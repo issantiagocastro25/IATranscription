@@ -83,7 +83,7 @@
             <div v-else class="col-5">
                 <div class="card" v-for="(response, index) in inferencias" :key="index">
                     <div class="card-body">
-                        <h5 class="card-title">Inferencia: {{ inferenciaNames[index] }}</h5>
+                        <h5 class="card-title">Inferencia: {{ agentesSeleccionados[index].rol }}</h5>
                         <p class="card-text">{{ response }}</p>
                     </div>
                 </div>
@@ -92,30 +92,22 @@
         </div>
     </div>
 
-    <!-- Modal de alerta -->
-    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="alertModalLabel">Advertencia</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 text-danger" viewBox="0 0 16 16"
-                        role="img" aria-label="Warning:">
-                        <path
-                            d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                    </svg>
-
-                    <h2>Seleccione un archivo de video para subir.</h2>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+    <!-- Modales de estado -->
+  <!-- Modales de estado -->
+        <!-- Modales de estado -->
+        <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="statusModalLabel">{{ modalTitle }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{ modalMessage }}</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
     <script>
         const { createApp, ref, onMounted, watch } = Vue
@@ -124,7 +116,7 @@
             setup() {
                 const inferenciaNames = ref(['Evaluador', 'Resumen', 'Otra inferencia']);
 
-                const apiHost = 'http://192.168.0.102:1905';
+                const apiHost = 'http://186.28.221.82:1905';
                 const selectedVideoFile = ref(null);
                 const loader = ref(false);
                 const loaderTranscription = ref(false);
@@ -138,6 +130,8 @@
                 const agentesSeleccionados = ref([]);
                 const inferencias = ref([]);
                 const editMode = ref(false);
+                const modalTitle = ref('');
+                const modalMessage = ref('');
 
                 const handleFileUpload = (event) => {
                     selectedVideoFile.value = event.target.files[0];
@@ -153,127 +147,149 @@
                     editMode.value = !editMode.value;
                 };
 
-                const uploadVideo = async () => {
-                    if (!selectedVideoFile.value) {
-                        new bootstrap.Modal(document.getElementById('alertModal')).show();
-                        return;
-                    }
-                    loaderTranscription.value = true;
-                    loaderInference.value = true;
-                    const formData = new FormData();
-                    formData.append('video', selectedVideoFile.value);
-
-                    try {
-                        const response = await axios.post(`${apiHost}/transcription/video`, formData);
-                        if (response.status !== 200) {
-                            statusUpload.value = 'Error al subir el archivo';
-                        } else {
-                            statusUpload.value = 'Archivo subido correctamente';
-                            transcription.value = response.data.text;
-                            inferencias.value = await getInferences();
-                        }
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                    } finally {
-                        loaderTranscription.value = false;
-                        loaderInference.value = false;
-                    }
+                const showModal = (title, message) => {
+                    modalTitle.value = title;
+                    modalMessage.value = message;
+                    const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+                    modal.show();
+                    setTimeout(() => {
+                        modal.hide();
+                    }, 2000);
                 };
 
-                const uploadSystemPrompt = async (agent) => {
-                    try {
-                        console.log('Actualizando prompt para el agente:', agent);
-                        const response = await axios.put(`${apiHost}/agents/${agent._id}`, {
-                            prompt: agent.prompt,
-                        });
-                        if (response.status !== 200) {
-                            statusUpload.value = 'Error actualizando el prompt system';
-                        } else {
-                            statusUpload.value = 'Prompt actualizado correctamente';
-                            console.log('Respuesta del servidor:', response.data);
-                            const updatedAgent = response.data;
-                            // Actualizar el agente en el estado local
-                            const index = agents.value.findIndex(a => a._id === agent._id);
-                            if (index !== -1) {
-                                agents.value[index] = updatedAgent;
-                            }
-                        }
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                    }
-                };
-
-                const getInferenceForAgent = async (id, prompt) => {
-                    try {
-                        const payload = { text: prompt };
-                        const response = await axios.post(`${apiHost}/agents/${id}/inference`, payload);
-                        if (response.status !== 200) {
-                            statusUpload.value = 'Error obteniendo la inferencia';
-                        }
-                        return response.data.inference.content;
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                    }
-                };
-
-                const getInferences = async () => {
-                    const inferences = await Promise.all(
-                        agentesSeleccionados.value.map(async (agent) => {
-                            return await getInferenceForAgent(agent._id, transcription.value);
-                        })
-                    );
-                    return inferences;
-                };
-
-                const getAgents = async () => {
-                    try {
-                        const response = await axios.get(`${apiHost}/agents`);
-                        if (response.status !== 200) {
-                            console.log('Error obteniendo los agentes');
-                        } else {
-                            agents.value = response.data;
-                            console.log('Agentes obtenidos del servidor:', agents.value);
-                        }
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                    }
-                };
-
-                onMounted(async () => {
-                    await getAgents();
-                    console.log('Agentes cargados:', agents.value);
-                });
-
-                watch(agentesSeleccionados, async () => {
-                    await getAgents();
-                });
-
-                return {
-                    handleFileUpload,
-                    uploadVideo,
-                    loaderTranscription,
-                    loaderInference,
-                    alert,
-                    statusUpload,
-                    transcription,
-                    inferencia,
-                    promptSystem,
-                    agents,
-                    uploadSystemPrompt,
-                    agentesSeleccionados,
-                    inferencias,
-                    editMode,
-                    toggleEdit,
-                    inferenciaNames
-                };
+        const uploadVideo = async () => {
+            if (!selectedVideoFile.value) {
+                new bootstrap.Modal(document.getElementById('alertModal')).show();
+                return;
             }
+            loaderTranscription.value = true;
+            loaderInference.value = true;
+            showModal('Cargando', 'Generando transcripción...');
+
+            const formData = new FormData();
+            formData.append('video', selectedVideoFile.value);
+
+            try {
+                const response = await axios.post(`${apiHost}/transcription/video`, formData);
+                if (response.status !== 200) {
+                    statusUpload.value = 'Error al subir el archivo';
+                    showModal('Error', 'Error generando la transcripción');
+                } else {
+                    statusUpload.value = 'Archivo subido correctamente';
+                    transcription.value = response.data.text;
+                    inferencias.value = await getInferences();
+                    showModal('Éxito', 'Transcripción completada');
+                }
+            } catch (error) {
+                statusUpload.value = error.message;
+                showModal('Error', 'Error generando la transcripción');
+            } finally {
+                loaderTranscription.value = false;
+                loaderInference.value = false;
+            }
+        };
+
+        const uploadSystemPrompt = async (agent) => {
+            try {
+                const response = await axios.put(`${apiHost}/agents/${agent._id}`, {
+                    prompt: agent.prompt,
+                });
+                if (response.status !== 200) {
+                    statusUpload.value = 'Error actualizando el prompt system';
+                    showModal('Error', `Error actualizando el prompt para ${agent.rol}`);
+                } else {
+                    statusUpload.value = 'Prompt actualizado correctamente';
+                    const updatedAgent = response.data;
+                    const index = agents.value.findIndex(a => a._id === agent._id);
+                    if (index !== -1) {
+                        agents.value[index] = updatedAgent;
+                    }
+                    showModal('Éxito', `Prompt actualizado para ${agent.rol}`);
+                }
+            } catch (error) {
+                statusUpload.value = error.message;
+                showModal('Error', `Error actualizando el prompt para ${agent.rol}`);
+            }
+        };
+
+        const getInferenceForAgent = async (id, prompt) => {
+            try {
+                const payload = { text: prompt };
+                const response = await axios.post(`${apiHost}/agents/${id}/inference`, payload);
+                if (response.status !== 200) {
+                    statusUpload.value = 'Error obteniendo la inferencia';
+                    showModal('Error', `Error generando la inferencia para el agente ${id}`);
+                }
+                return response.data.inference.content;
+            } catch (error) {
+                statusUpload.value = error.message;
+                showModal('Error', `Error generando la inferencia para el agente ${id}`);
+            }
+        };
+
+        const getInferences = async () => {
+            const inferences = await Promise.all(
+                agentesSeleccionados.value.map(async (agent) => {
+                    showModal('Cargando', `Generando inferencia para ${agent.rol}`);
+                    const inference = await getInferenceForAgent(agent._id, transcription.value);
+                    showModal('Éxito', `Inferencia completada para ${agent.rol}`);
+                    return inference;
+                })
+            );
+            return inferences;
+        };
+
+        const getAgents = async () => {
+            try {
+                const response = await axios.get(`${apiHost}/agents`);
+                if (response.status !== 200) {
+                    console.log('Error obteniendo los agentes');
+                } else {
+                    agents.value = response.data;
+                    console.log('Agentes obtenidos del servidor:', agents.value);
+                }
+            } catch (error) {
+                statusUpload.value = error.message;
+            }
+        };
+
+        onMounted(async () => {
+            await getAgents();
+            console.log('Agentes cargados:', agents.value);
+        });
+
+        watch(agentesSeleccionados, async () => {
+            await getAgents();
+        });
+
+        return {
+            handleFileUpload,
+            uploadVideo,
+            loaderTranscription,
+            loaderInference,
+            alert,
+            statusUpload,
+            transcription,
+            inferencia,
+            promptSystem,
+            agents,
+            uploadSystemPrompt,
+            agentesSeleccionados,
+            inferencias,
+            editMode,
+            toggleEdit,
+            inferenciaNames,
+            modalTitle,
+            modalMessage
+        };
+        }
         }).mount('#app')
-    </script>
+            </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+                crossorigin="anonymous"></script>
 
-</body>
+        </body>
 
-</html>
+        </html>
