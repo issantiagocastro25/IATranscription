@@ -69,7 +69,7 @@
             </div>
         </div>
         <!-- End upload Video -->
-        
+
 
         <div class="row justify-content-center mt-3">
             <div class="col-5">
@@ -89,7 +89,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Modal de alerta -->
         <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -100,18 +100,19 @@
                     </div>
                     <div class="modal-body mx-auto ">
                         <div>
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 text-danger" style="width: 10rem; height: 10rem;" fill="red" viewBox="0 0 16 16"
-                            role="img" aria-label="Warning:">
-                            <path
-                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                            
-                        </svg>
-                        </div> 
-                        
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 text-danger"
+                                style="width: 10rem; height: 10rem;" fill="red" viewBox="0 0 16 16" role="img"
+                                aria-label="Warning:">
+                                <path
+                                    d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+
+                            </svg>
+                        </div>
+
                     </div>
 
-                    <h1 class="mx-auto ">Seleccione un archivo de video para subir.</h1>
+                    <h3 class="mx-auto text-center">Seleccione un archivo de video para subir.</h3>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
@@ -119,8 +120,8 @@
             </div>
         </div>
 
-         <!-- Modal de progreso -->
-         <div class="modal fade" id="modalProgress" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <!-- Modal de progreso -->
+        <div class="modal fade" id="modalProgress" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -129,252 +130,165 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <ul>
+                            <ul class="unstyled">
                                 <li v-for="(task, index) in tasks" :key="index">
-                                    <div v-if="task.status === 'waiting'"> 
-                                        <div class="spinner-border text-primary spinner-border-sm" style="width: 1rem; height: 1rem;" role="status">
+                                    <div v-if="task.status === 'waiting'">
+                                        <div class="spinner-border text-primary spinner-border-sm"
+                                            style="width: 1rem; height: 1rem;" role="status">
                                             <span class="sr-only"></span>
                                         </div>
-                                       <!--{{ task.status }} - --> {{ task.name }} </div>
-                                    <div v-else-if="task.status === 'success'"> 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check-square-fill" viewBox="0 0 16 16">
-                                            <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"/>
+                                        <!--{{ task.status }} - --> {{ task.name }} </div>
+                                    <div v-else-if="task.status === 'success'">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green"
+                                            class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97L7 10.293 5.21 8.5a1 1 0 0 0-1.414 1.415l2.5 2.5a1 1 0 0 0 1.415 0l6-6a1 1 0 0 0-1.415-1.415z" />
                                         </svg>
                                         <!--{{ task.status }} - --> {{ task.name }} </div>
-                                    <div v-else-if="task.status === 'failed'"> 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
-                                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                                    <div v-else-if="task.status === 'error'">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red"
+                                            class="bi bi-x-square-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm10.854 4.646a.5.5 0 1 1-.708.708L8 7.207 5.854 5.854a.5.5 0 1 1 .708-.708L8 5.793l2.146-2.147a.5.5 0 0 1 .708 0z" />
                                         </svg>
                                         <!--{{ task.status }} - --> {{ task.name }} </div>
-                                    
                                 </li>
                             </ul>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
+
                 </div>
             </div>
         </div>
-    
+        <!-- Fin modal de progreso -->
     </div>
 
-
     <script>
-        const { createApp, ref, onMounted, watch } = Vue
+        const { createApp } = Vue;
 
         createApp({
-            setup() {
-                const inferenciaNames = ref(['Evaluador', 'Resumen', 'Otra inferencia']);
-
-                const apiHost = 'http://192.168.0.102:1905';
-                const selectedVideoFile = ref(null);
-                const loader = ref(false);
-                const loaderTranscription = ref(false);
-                const loaderInference = ref(false);
-                const alert = ref(false);
-                const statusUpload = ref(null);
-                const transcription = ref(null);
-                const inferencia = ref(null);
-                const promptSystem = ref([]);
-                const agents = ref([]);
-                const agentesSeleccionados = ref([]);
-                const inferencias = ref([]);
-                const editMode = ref(false);
-                const viewProgress = ref('');
-                const taskStatus = Object.freeze({
-                    WAITING: 'waiting',
-                    SUCCESS: 'success',
-                    FAILED: 'failed'
-                });
-
-                const tasks = ref([
-                    { 
-                        name: 'Subiendo video',
-                        status: false, // waiting, success, failed 
-                    },
-                    {
-                        name: 'Generando Transcripcion',
-                        status: false, // waiting, success, failed 
-                    },
-                ]);
-
-                const handleFileUpload = (event) => {
-                    selectedVideoFile.value = event.target.files[0];
-                    const fileExtension = selectedVideoFile.value.name.split('.').pop().toLowerCase();
-                    if (fileExtension !== 'mp4') {
-                        alert('Solo se permiten archivos MP4.');
-                        selectedVideoFile.value = '';
-                        return;
-                    }
-                };
-
-                const showModalProgress = () => {
-                    const modal = new bootstrap.Modal(document.getElementById('modalProgress'));
-                    modal.show();
-                    // setTimeout(() => {
-                    //     modal.hide();
-                    // }, 2000);
-                };
-
-                const uploadVideo = async () => {
-                    if (!selectedVideoFile.value) {
-                        new bootstrap.Modal(document.getElementById('alertModal')).show();
-                        return;
-                    }
-                    const formData = new FormData();
-                    formData.append('video', selectedVideoFile.value);
-
-                    // Crear la lista de tareas
-                    const agentTasks = agentesSeleccionados.value.map( (agent) => ({
-                        name: `Agente ${agent.rol}`,
-                        rol: agent.rol,
-                        status: false
-                    }))
-                    // agregar a la lista de tareas
-                    tasks.value.push(...agentTasks)
-                    
-                    // Iniciar el estado de las tasks
-                    tasks.value.forEach(task => {
-                        task.status = taskStatus.WAITING
-                    });
-                    // mostrar el modal con las tareas
-                    showModalProgress()
-
-                    try {
-                        const response = await axios.post(`${apiHost}/transcription/video`, formData);
-                        if (response.status !== 200) {
-                            tasks.value[0].status = taskStatus.FAILED; // Upload video
-                            tasks.value[1].status = taskStatus.FAILED; // transcription
-                        } else {
-                            tasks.value[0].status = taskStatus.SUCCESS; // Upload video
-                            tasks.value[1].status = taskStatus.SUCCESS; // transcription
-
-                            transcription.value = response.data.text;
-                            
-                            // Obtener las inferencias
-                            inferencias.value = await getInferences();
-                            // viewProgress.value = 'inferenceSuccess';
-                        }
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                        tasks.value[0].status = taskStatus.FAILED;
-                        tasks.value[1].status = taskStatus.FAILED;
-                    }
-                };
-
-                const uploadSystemPrompt = async (agent) => {
-                    
-                    try {
-                        console.log('Actualizando prompt para el agente:', agent);
-                        const response = await axios.put(`${apiHost}/agents/${agent._id}`, {
-                            prompt: agent.prompt,
-                        });
-                        if (response.status !== 200) {
-                            statusUpload.value = 'Error actualizando el prompt system';
-                        } else {
-                            statusUpload.value = 'Prompt actualizado correctamente';
-                            console.log('Respuesta del servidor:', response.data);
-                            const updatedAgent = response.data;
-                            // Actualizar el agente en el estado local
-                            const index = agents.value.findIndex(a => a._id === agent._id);
-                            if (index !== -1) {
-                                agents.value[index] = updatedAgent;
-                            }
-                        }
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                    }
-                };
-
-                const getInferenceForAgent = async (id, prompt) => {
-                    try {
-                        const payload = { text: prompt };
-                        const response = await axios.post(`${apiHost}/agents/${id}/inference`, payload);
-                        if (response.status !== 200) {
-                            statusUpload.value = 'Error obteniendo la inferencia';
-                        }
-                        // se obtiene la respuesta de cada agente
-                        console.log(response);
-                        const myresponse = {
-                            agent: response.data.agent.rol,
-                            inference: response.data.inference.content
-                        }
-                        // Cambiar el estado del agente
-                        const agentIndex = tasks.value.findIndex(task => task.rol === myresponse.agent);
-                        tasks.value[agentIndex].status = taskStatus.SUCCESS; // transcription
-
-                        return myresponse;
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                    }
-                };
-
-                const getInferences = async () => {
-                    const inferences = await Promise.all(
-                        agentesSeleccionados.value.map(async (agent) => {
-                            return await getInferenceForAgent(agent._id, transcription.value);
-                        })
-                    );
-                    console.log(inferences);
-                    return inferences;
-                };
-
-                const getAgents = async () => {
-                    try {
-                        const response = await axios.get(`${apiHost}/agents`);
-                        if (response.status !== 200) {
-                            console.log('Error obteniendo los agentes');
-                        } else {
-                            agents.value = response.data;
-                            console.log('Agentes obtenidos del servidor:', agents.value);
-                        }
-                    } catch (error) {
-                        statusUpload.value = error.message;
-                    }
-                };
-
-                onMounted(async () => {
-                    await getAgents();
-                    console.log('Agentes cargados:', agents.value);
-                });
-
-                watch(agentesSeleccionados, async () => {
-                    await getAgents();
-                });
-
+            data() {
                 return {
-                    handleFileUpload,
-                    uploadVideo,
-                    loaderTranscription,
-                    loaderInference,
-                    alert,
-                    statusUpload,
-                    transcription,
-                    inferencia,
-                    promptSystem,
-                    agents,
-                    uploadSystemPrompt,
-                    agentesSeleccionados,
-                    inferencias,
-                    editMode,
-                    inferenciaNames,loader, viewProgress, tasks
+                    agents: [],
+                    agentesSeleccionados: [],
+                    videoFile: null,
+                    editMode: false,
+                    inferencias: [],
+                    transcription: '',
+                    tasks: [],
+                    statusUpload: '',
                 };
+            },
+            mounted() {
+                this.getAgentes();
+            },
+            watch: {
+                tasks: {
+                    handler() {
+                        this.checkTasksCompletion();
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                getAgentes() {
+                    axios.get('http://127.0.0.1:8000/api/v1/agents')
+                        .then(response => {
+                            this.agents = response.data.agents;
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                },
+                uploadSystemPrompt(agent) {
+                    axios.post('http://127.0.0.1:8000/api/v1/agent/edit', {
+                        id: agent._id,
+                        systemPrompt: agent.prompt
+                    })
+                        .then(response => {
+                            console.log(response.data.message);
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                },
+                handleFileUpload(event) {
+                    this.videoFile = event.target.files[0];
+                },
+                async uploadVideo() {
+                    if (!this.videoFile) {
+                        const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+                        alertModal.show();
+                        return;
+                    }
+                    this.statusUpload = 'Subiendo video...';
+
+                    const formData = new FormData();
+                    formData.append('video', this.videoFile);
+
+                    try {
+                        this.tasks = [
+                            { name: 'Subiendo video', status: 'waiting' },
+                            { name: 'Generando transcripción', status: 'waiting' },
+                            { name: 'Generando inferencias', status: 'waiting' }
+                        ];
+
+                        const response = await axios.post('http://127.0.0.1:8000/api/v1/upload', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        });
+
+                        this.tasks[0].status = 'success';
+                        this.statusUpload = 'Video subido con éxito. Generando transcripción e inferencias...';
+
+                        const modalProgress = new bootstrap.Modal(document.getElementById('modalProgress'));
+                        modalProgress.show();
+
+                        this.getTranscripcion(response.data.videoId);
+                    } catch (error) {
+                        this.tasks[0].status = 'error';
+                        this.statusUpload = 'Error al subir el video.';
+                        console.error(error);
+                    }
+                },
+                async getTranscripcion(videoId) {
+                    try {
+                        const response = await axios.get(`http://127.0.0.1:8000/api/v1/transcription/${videoId}`);
+
+                        this.tasks[1].status = 'success';
+                        this.transcription = response.data.transcription;
+
+                        this.getInferencias(videoId);
+                    } catch (error) {
+                        this.tasks[1].status = 'error';
+                        this.statusUpload = 'Error al generar la transcripción.';
+                        console.error(error);
+                    }
+                },
+                async getInferencias(videoId) {
+                    try {
+                        const response = await axios.get(`http://127.0.0.1:8000/api/v1/inferences/${videoId}`);
+
+                        this.tasks[2].status = 'success';
+                        this.inferencias = response.data.inferences;
+                        this.statusUpload = 'Inferencias generadas con éxito.';
+                    } catch (error) {
+                        this.tasks[2].status = 'error';
+                        this.statusUpload = 'Error al generar las inferencias.';
+                        console.error(error);
+                    }
+                },
+                checkTasksCompletion() {
+                    const allTasksCompleted = this.tasks.every(task => task.status === 'success');
+                    if (allTasksCompleted) {
+                        const modalProgress = bootstrap.Modal.getInstance(document.getElementById('modalProgress'));
+                        modalProgress.hide();
+                    }
+                }
             }
-        }).mount('#app')
+        }).mount('#app');
     </script>
-
-    <style>
-        .mi-icono {
-            width: 20px;
-            height: 20px;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-
 </body>
 
 </html>
